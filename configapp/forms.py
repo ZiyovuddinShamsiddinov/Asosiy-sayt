@@ -1,9 +1,15 @@
-import re
 from django import forms
-from django.core.exceptions import ValidationError
-from django.template.defaultfilters import title
-from .models import Categories,News
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from .models import *
 
+class UserLoginForm(AuthenticationForm):
+    username = forms.CharField(label='login',widget=forms.TextInput(attrs={'class':'form-control'}))
+    password = forms.CharField(label='password',widget=forms.PasswordInput(attrs={'class':'form-control'}))
+
+    class Meta:
+        model=User
+        fields=('username','password',)
 #Add news.1
 # class NewsForm(forms.Form):
 #     title=forms.CharField(max_length=150,label='Название', ###
@@ -36,6 +42,6 @@ class NewsForm(forms.ModelForm):
 
     # def clean_title(self):
     #     title=self.cleaned_data['title']
-    #     if re.match(r'\d' , title):
+    #     if re.sea rch(r'\d' , title):  # `re.match()` faqat string boshini tekshiradi
     #         raise ValidationError('Title raqam bulmasin')
     #     return title

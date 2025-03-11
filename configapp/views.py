@@ -1,9 +1,34 @@
+from django.contrib.auth import authenticate, login
 from django.shortcuts import render,redirect,get_object_or_404
 from django.middleware.csrf import get_token
-from configapp.forms import NewsForm,Categories
+from configapp.forms import NewsForm, Categories, UserLoginForm
 from configapp.models import *
 
+def news_search(request):
+    query = request.GET.get('q', '').strip()  # Bo‘sh joylarni
+    news_item = News.objects.filter(title__iexact=query).first()  # Katta-kichik harf ajratmasdan qidirish
 
+    if query:
+        try:
+            news_item = News.objects.filter(title__iexact=query).first()        # Aniq sarlavha bo‘yicha qidirish
+        except News.DoesNotExist:
+            news_item = None
+
+    return render(request, 'index.html', {'news_item': news_item, 'query': query})
+
+def loginPage(request):
+    if request.method == "POST":
+        username=request.POST.get('username')
+        password=request.POST.get('password')
+
+        user=authenticate(request,username=username,password=password)
+        if user is not None:
+            login(request,user)
+            return redirect('home')
+
+    else:
+        form=UserLoginForm()
+    return render(request,'login.html',{'form':form})
 
 def index(request):
     news=News.objects.all()
@@ -56,10 +81,15 @@ def update_news(request,new_id):
     else:
         form = NewsForm(instance=new)
 
-    return render(request,'delete_new.html',{'form':form,"new":new})
+    return render(request,'update_new.html',{'form':form,"new":new})
 
+def delete_new(request,new_id):
+    new=get_object_or_404(News, id=new_id)
+    if request.method == "POST":
+        new.delete()
+        return redirect('home')
+    return redirect('home')
 
-    #26.02.25
 
     # def new_about(request,category_id):
 #     new=News.objects.get(pk=category_id)
@@ -91,10 +121,5 @@ def update_news(request,new_id):
 #         form = CategoriesForm()
 #     return render(request,'add_news.html',{'form':form})
 
-def delete_new(request,new_id):
-    new=get_object_or_404(News, id=new_id)
-    if request.method == "POST":
-            new.delete()
-            return redirect('home')
-    return redirect('home')
+
 

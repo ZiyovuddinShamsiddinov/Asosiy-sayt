@@ -33,6 +33,20 @@
 
 </nav>
 
+ <h1>Yangilikni Qidirish</h1>
+
+    <form method="GET" action="">
+        <input type="text" name="q" placeholder="Sarlavhani kiriting..." value="{{ query }}">
+        <button type="submit">Qidirish</button>
+    </form>
+
+    {% if news_item %}
+        <h2>{{ news_item.title }}</h2>
+        <p>{{ news_item.content }}</p>
+    {% elif query %}
+        <p>Hech qanday yangilik topilmadi.</p>
+    {% endif %}
+
 <div class="row">
   <div class="col-3 text-center mt-6">
     <ul class="list-group">
@@ -43,6 +57,7 @@
 
     </ul>
   </div>
+
   <div class="col-9 mt-4">
     {% for item in news%}
     <div class="card mt-4 ">
