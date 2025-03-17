@@ -33,7 +33,16 @@
 
 </nav>
 
- <h1>Yangilikni Qidirish</h1>
+{% for massage in massages %}
+<div class="alert alert-primary d-flex align-items-center" role="alert">
+  <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
+  <div>
+    {{massage}}
+  </div>
+</div>
+{% endfor %}
+
+<h1>Yangilikni Qidirish</h1>
 
     <form method="GET" action="">
         <input type="text" name="q" placeholder="Sarlavhani kiriting..." value="{{ query }}">
@@ -65,14 +74,14 @@
     {{item.category}}
   </div>
   <div class="card-body">
-    {% if item.phone%}
-    <img src="{{item.photo.url}}" alt="" width="350">
-    {% else %}
-      <img src="http://picsum.photos/200" class="img-thumbnail" alt="">
+    {% if item.photos%}
+    <img src="{{item.photos.url}}" alt="" width="350">
+    
     {% endif %}
     <h5 class="card-title">{{item.title}}</h5>
       <p class="card-text">{{item.context  |safe|linebreaks|truncatewords:50}}</p>
     <a href="{% url 'new_about' item.pk %}" class="btn btn-primary">Batafsil</a>
+    <a href="{% url 'delete_new' item.pk %}" class="btn btn-success mt-2">Delete</a>
     </div>
   <div class="card-footer text-muted">
     {{item.created_ed | date:'Y-m-d H:i:s'}}

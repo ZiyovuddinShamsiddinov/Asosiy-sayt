@@ -3,6 +3,17 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.middleware.csrf import get_token
 from configapp.forms import NewsForm, Categories, UserLoginForm
 from configapp.models import *
+from django.contrib import messages
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import threading
+
+def set_up_cloud(file,instance):
+    file_path=default_storage(file,ContentFile(file.read))
+    instance.photo = file_path
+    instance.save()
+
+
 
 def news_search(request):
     query = request.GET.get('q', '').strip()  # Bo‘sh joylarni
@@ -53,15 +64,22 @@ def categories(request,category_id):
                 #28.02.25
 
 def add_news(request):
-    # print("token = = ",get_token(request)) token tutib olish
     if request.method == "POST":
-        form = NewsForm(request.POST)
+        print("FILES:", request.FILES)  # Проверяем, есть ли файлы
+        form = NewsForm(request.POST, files=request.FILES)
         if form.is_valid():
-            news = form.save()
+            file = request.FILES.get("photo")  # Используем .get(), чтобы избежать KeyError
+            thread =threading.Thread(target=set_up_cloud,args=(file,form))
+            thread.start()
+            messages.success(request, "Малумот сақланди")
             return redirect('home')
+        else:
+            print("Форма не валидна:", form.errors)  # Вывод ошибок формы
+            messages.error(request, form.errors)
     else:
         form = NewsForm()
-    return render(request,'add_news.html',{'form':form})
+    return render(request, 'add_news.html', {'form': form})
+
 
 def new_about(request,new_id):
     new=get_object_or_404(News,pk=new_id)
@@ -83,12 +101,18 @@ def update_news(request,new_id):
 
     return render(request,'update_new.html',{'form':form,"new":new})
 
-def delete_new(request,new_id):
-    new=get_object_or_404(News, id=new_id)
-    if request.method == "POST":
-        new.delete()
-        return redirect('home')
+
+def delete_new(request, category_id):
+    new = get_object_or_404(News, id=category_id)
+    new.delete()
     return redirect('home')
+
+# def delete_new(request,new_id):
+#     new=get_object_or_404(News, id=new_id)
+#     if request.method == "POST":
+#         new.delete()
+#         return redirect('home')
+#     return redirect('home')
 
 
     # def new_about(request,category_id):
