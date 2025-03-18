@@ -11,6 +11,7 @@ class UserLoginForm(AuthenticationForm):
     class Meta:
         model=User
         fields=('username','password',)
+
 #Add news.1
 # class NewsForm(forms.Form):
 #     title=forms.CharField(max_length=150,label='Название', ###
@@ -33,16 +34,19 @@ class NewsForm(forms.ModelForm):
 
     class Meta:
         model=News
-        fields=['title','context','is_bool','category','photos']
+        fields=['title','context','is_bool','category']
         #exclude =['created_ed']-shundan tashqari barchasi
         # fields='__all__'
-        widgets={
-            'title':forms.TextInput(attrs={'class':'form-control'}),
-            'context':forms.Textarea(attrs={'class':'form-control','rows':5}),
-            'category':forms.Select(attrs={'class':'form-control'}),    
+    widgets = {
+        'title': forms.TextInput(attrs={'class': 'form-control'}),
+        'context': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        'category': forms.Select(attrs={'class': 'form-control'}),
 
-        }
-
+    }
+    video = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'video/*'})
+    )
     # def clean_title(self):
     #     title=self.cleaned_data['title']
     #     if re.sea rch(r'\d' , title):  # `re.match()` faqat string boshini tekshiradi

@@ -8,6 +8,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import threading
 
+
 def set_up_cloud(file,instance):
     file_path=default_storage(file,ContentFile(file.read))
     instance.photo = file_path
@@ -41,15 +42,6 @@ def loginPage(request):
         form=UserLoginForm()
     return render(request,'login.html',{'form':form})
 
-def index(request):
-    news=News.objects.all()
-    categories=Categories.objects.all()
-    context={
-        'news':news,
-        'categories':categories,
-    }
-    return render(request,'index.html',context=context)
-
 def categories(request,category_id):
     news=News.objects.filter(category_id=category_id)
     categories=Categories.objects.all()
@@ -63,22 +55,55 @@ def categories(request,category_id):
 
                 #28.02.25
 
-def add_news(request):
-    if request.method == "POST":
-        print("FILES:", request.FILES)  # Проверяем, есть ли файлы
-        form = NewsForm(request.POST, files=request.FILES)
+# def add_news(request):
+#     if request.method == "POST":
+#         print("FILES:", request.FILES)  # Проверяем, есть ли файлы
+#         form = NewsForm(request.POST, files=request.FILES)
+#         if form.is_valid():
+#             file = request.FILES.get("photo")  # Используем .get(), чтобы избежать KeyError
+#             thread =threading.Thread(target=set_up_cloud,args=(file,form))
+#             thread.start()
+#             messages.success(request, "Малумот сақланди")
+#             return redirect('home')
+#         else:
+#             print("Форма не валидна:", form.errors)  # Вывод ошибок формы
+#             messages.error(request, form.errors)
+#     else:
+#         form = NewsForm()
+#     return render(request, 'add_news.html', {'form': form})
+
+def add_news(request, set_up_cloud=None):
+    if request.method == 'POST':
+        form = NewsForm(request.POST, request.FILES)
         if form.is_valid():
-            file = request.FILES.get("photo")  # Используем .get(), чтобы избежать KeyError
-            thread =threading.Thread(target=set_up_cloud,args=(file,form))
-            thread.start()
-            messages.success(request, "Малумот сақланди")
-            return redirect('home')
-        else:
-            print("Форма не валидна:", form.errors)  # Вывод ошибок формы
-            messages.error(request, form.errors)
+            form_instance = form.save()  # Formani oldin saqlaymiz
+
+            video_file = request.FILES.get("video")  # ✅ get() ishlatilmoqda
+
+            if video_file and set_up_cloud:  # ✅ set_up_cloud tekshirilmoqda
+                thread = threading.Thread(target=set_up_cloud, args=(video_file, form_instance))
+                thread.start()
+
+            messages.success(request, "OK, saqlandi!")
+            return redirect('home')  # Asosiy sahifaga qaytish
+
     else:
         form = NewsForm()
+
     return render(request, 'add_news.html', {'form': form})
+
+
+def index(request):
+    news = News.objects.all()
+    categories = Categories.objects.all()
+
+    context = {
+        'news': news,
+        'categories': categories,
+    }
+    return render(request, 'index.html', context=context)
+
+
 
 
 def new_about(request,new_id):

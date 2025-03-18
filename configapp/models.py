@@ -15,6 +15,7 @@ class News(models.Model):
     created_ed = models.DateTimeField(auto_now_add=True)
     updated_ed = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Categories, on_delete=models.CASCADE,related_name="get_news")
+    video = models.FileField(upload_to='videos/', blank=True, null=True,default='default.jpg')
     photos = models.ImageField(upload_to='photos/%Y/%m/%d/',null=True,blank=True,default='default.jpg')
     is_bool = models.BooleanField(default=True)
     views=models.IntegerField(default=0)
